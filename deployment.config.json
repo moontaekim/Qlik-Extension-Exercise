@@ -1,0 +1,18 @@
+{
+  "server": {
+    "host": "hostname",
+    "isSecure": false,
+    "prefix": "hdr",
+    "headers": {
+      "hdr-usr": "domain\\username",
+      "cache-control": "no-cache"
+    },
+    "addParams": {
+      "withCredentials": false
+    }
+  },
+  "desktop": {
+    "destination": "/Users/mtkim/Downloads/Qlik Core Desktop/Extensions"
+
+  }
+}
