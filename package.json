@@ -18,6 +18,10 @@
     "watch-vanilla-deploy-desktop": "qext-scripts -W -D"
   },
   "devDependencies": {
+    "prettier": "^1.16.4",
     "qext-scripts": "^0.6.0"
+  },
+  "dependencies": {
+    "d3": "^5.8.0"
   }
 }
