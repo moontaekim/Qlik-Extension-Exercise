@@ -10200,18 +10200,17 @@ exports.default = function ($element, layout) {
   var colorFillOne = layout.colorFillOne;
   var colorFillTwo = layout.colorFillTwo;
 
-  console.log(qMatrix);
   //shapes
   var line = qMatrix.map(function (d) {
     d3.select("svg").append("line").attr("x1", xScale(d[0].qText) + xScale.bandwidth() / 2).attr("y1", yScale(d[2].qNum)).attr("x2", xScale(d[0].qText) + xScale.bandwidth() / 2).attr("y2", yScale(d[1].qNum)).attr("stroke", "red").attr("strokeWidth", "1").attr("dim-index", d[0].qElemNumber).classed("selectable", true);
   });
 
   var circleMeasureOne = qMatrix.map(function (d) {
-    d3.select("svg").append("circle").attr("cx", xScale(d[0].qText) + xScale.bandwidth() / 2).attr("cy", yScale(d[1].qNum)).attr("r", 5).attr("fill", colorFillOne).attr("dim-index", d[0].qElemNumber).classed("selectable", true);
+    d3.select("svg").append("circle").attr("cx", xScale(d[0].qText) + xScale.bandwidth() / 2).attr("cy", yScale(d[1].qNum)).attr("r", 5).attr("fill", colorFillOne).attr("dim-index", d[0].qElemNumber).classed("selectable", true).on("mouseover", handleMouseOver).on("mouseout", handleMouseOut);
   });
 
   var circleMeasureTwo = qMatrix.map(function (d) {
-    d3.select("svg").append("circle").attr("cx", xScale(d[0].qText) + xScale.bandwidth() / 2).attr("cy", yScale(d[2].qNum)).attr("r", 5).attr("fill", colorFillTwo).attr("dim-index", d[0].qElemNumber).classed("selectable", true);
+    d3.select("svg").append("circle").attr("cx", xScale(d[0].qText) + xScale.bandwidth() / 2).attr("cy", yScale(d[2].qNum)).attr("r", 5).attr("fill", colorFillTwo).attr("dim-index", d[0].qElemNumber).classed("selectable", true).on("mouseover", handleMouseOver).on("mouseout", handleMouseOut);
   });
 
   $element.find(".selectable").on("click", function () {
@@ -10221,12 +10220,19 @@ exports.default = function ($element, layout) {
 
   //axis
   var yAxis = d3.axisLeft().scale(yScale);
-
   var xAxis = d3.axisBottom().scale(xScale);
-
   var gxAxis = svg.append("g").attr("transform", "translate(" + margin.left + ", 0)").call(yAxis);
 
   var gyAxis = svg.append("g").attr("transform", "translate(0, " + (height - margin.bottom) + ")").call(xAxis);
+
+  //mouse events how do i group an entire dumbell together to do this???
+  function handleMouseOver(d, i) {
+    //conditional statement. If hovered item has qElem number, do something.
+    d3.select(this).attr("r", 10);
+  }
+  function handleMouseOut(d, i) {
+    d3.select(this).attr("r", 5);
+  }
 };
 
 var _d = __webpack_require__(186);

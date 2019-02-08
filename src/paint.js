@@ -54,7 +54,6 @@ export default function($element, layout) {
   var colorFillOne = layout.colorFillOne;
   var colorFillTwo = layout.colorFillTwo;
 
-  console.log(qMatrix);
   //shapes
   const line = qMatrix.map(d => {
     d3.select("svg")
@@ -77,7 +76,9 @@ export default function($element, layout) {
       .attr("r", 5)
       .attr("fill", colorFillOne)
       .attr("dim-index", d[0].qElemNumber)
-      .classed("selectable", true);
+      .classed("selectable", true)
+      .on("mouseover", handleMouseOver)
+      .on("mouseout", handleMouseOut);
   });
 
   const circleMeasureTwo = qMatrix.map(d => {
@@ -88,7 +89,9 @@ export default function($element, layout) {
       .attr("r", 5)
       .attr("fill", colorFillTwo)
       .attr("dim-index", d[0].qElemNumber)
-      .classed("selectable", true);
+      .classed("selectable", true)
+      .on("mouseover", handleMouseOver)
+      .on("mouseout", handleMouseOut);
   });
 
   $element.find(".selectable").on("click", function() {
@@ -98,9 +101,7 @@ export default function($element, layout) {
 
   //axis
   var yAxis = d3.axisLeft().scale(yScale);
-
   var xAxis = d3.axisBottom().scale(xScale);
-
   var gxAxis = svg
     .append("g")
     .attr("transform", `translate(${margin.left}, 0)`)
@@ -110,4 +111,13 @@ export default function($element, layout) {
     .append("g")
     .attr("transform", `translate(0, ${height - margin.bottom})`)
     .call(xAxis);
+
+  //mouse events how do i group an entire dumbell together to do this???
+  function handleMouseOver(d, i) {
+    //conditional statement. If hovered item has qElem number, do something.
+    d3.select(this).attr("r", 10);
+  }
+  function handleMouseOut(d, i) {
+    d3.select(this).attr("r", 5);
+  }
 }
