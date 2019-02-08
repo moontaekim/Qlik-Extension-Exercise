@@ -15,7 +15,7 @@ export default function($element, layout) {
     bottom: 50
   };
 
-  $element.css("overflow-x", "auto");
+  $element.css("overflow", "auto");
 
   //data
   var qMatrix = layout.qHyperCube.qDataPages[0].qMatrix;
@@ -54,6 +54,7 @@ export default function($element, layout) {
   var colorFillOne = layout.colorFillOne;
   var colorFillTwo = layout.colorFillTwo;
 
+  console.log(qMatrix);
   //shapes
   const line = qMatrix.map(d => {
     d3.select("svg")
@@ -63,7 +64,9 @@ export default function($element, layout) {
       .attr("x2", xScale(d[0].qText) + xScale.bandwidth() / 2)
       .attr("y2", yScale(d[1].qNum))
       .attr("stroke", "red")
-      .attr("strokeWidth", "1");
+      .attr("strokeWidth", "1")
+      .attr("dim-index", d[0].qElemNumber)
+      .classed("selectable", true);
   });
 
   const circleMeasureOne = qMatrix.map(d => {
@@ -72,7 +75,9 @@ export default function($element, layout) {
       .attr("cx", xScale(d[0].qText) + xScale.bandwidth() / 2)
       .attr("cy", yScale(d[1].qNum))
       .attr("r", 5)
-      .attr("fill", colorFillOne);
+      .attr("fill", colorFillOne)
+      .attr("dim-index", d[0].qElemNumber)
+      .classed("selectable", true);
   });
 
   const circleMeasureTwo = qMatrix.map(d => {
@@ -81,7 +86,14 @@ export default function($element, layout) {
       .attr("cx", xScale(d[0].qText) + xScale.bandwidth() / 2)
       .attr("cy", yScale(d[2].qNum))
       .attr("r", 5)
-      .attr("fill", colorFillTwo);
+      .attr("fill", colorFillTwo)
+      .attr("dim-index", d[0].qElemNumber)
+      .classed("selectable", true);
+  });
+
+  $element.find(".selectable").on("click", function() {
+    var dimInd = parseInt(this.getAttribute("dim-index"));
+    backendApi.selectValues(0, [dimInd], true);
   });
 
   //axis
