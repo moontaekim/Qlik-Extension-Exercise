@@ -1,35 +1,13 @@
 import * as d3 from "d3";
 
 export default function($element, layout) {
-  var backendApi = this.backendApi;
+  var ext = this;
+  var viz = ext.$scope.viz;
 
-  var element = $element[0];
-  var container = element.querySelector(".chart-container");
-  var rect = container.getBoundingClientRect();
-  var height = rect.height;
-  var width = rect.width;
-  var margin = {
-    top: 10,
-    left: 50,
-    right: 10,
-    bottom: 50
-  };
-
-  $element.css("overflow", "auto");
-
-  //data
   var qMatrix = layout.qHyperCube.qDataPages[0].qMatrix;
-
-  //dimension
+  viz.data = qMatrix;
   var dimension = qMatrix.map(d => d[0].qText);
 
-  //xScale
-  var xScale = d3
-    .scaleBand()
-    .domain(dimension)
-    .range([margin.left, width - margin.right]);
-
-  //yScale
   var maxMeasureOne = layout.qHyperCube.qMeasureInfo[0].qMax;
   var maxMeasureTwo = layout.qHyperCube.qMeasureInfo[1].qMax;
   var max = Math.max(maxMeasureOne, maxMeasureTwo);
@@ -38,81 +16,51 @@ export default function($element, layout) {
   var minMeasureTwo = layout.qHyperCube.qMeasureInfo[1].qMin;
   var min = Math.min(minMeasureOne, minMeasureTwo);
 
-  var yScale = d3
-    .scaleLinear()
-    .domain([Math.min(min, 0), max])
-    .range([height - margin.bottom, margin.top]);
+  viz.xScale.domain(dimension);
+  viz.yScale.domain([Math.min(min, 0), max]);
 
-  //svg stuff
-  var svg = d3
-    .select(element.querySelector("svg"))
-    .html("")
-    .attr("width", width)
-    .attr("height", height);
-
-  //color fills
   var colorFillOne = layout.colorFillOne;
   var colorFillTwo = layout.colorFillTwo;
 
-  //shapes
-  const line = qMatrix.map(d => {
-    d3.select("svg")
-      .append("line")
-      .attr("x1", xScale(d[0].qText) + xScale.bandwidth() / 2)
-      .attr("y1", yScale(d[2].qNum))
-      .attr("x2", xScale(d[0].qText) + xScale.bandwidth() / 2)
-      .attr("y2", yScale(d[1].qNum))
-      .attr("stroke", "red")
-      .attr("strokeWidth", "1")
-      .attr("dim-index", d[0].qElemNumber)
-      .classed("selectable", true);
-  });
+  //why is resizing not working. circles dont move.
+  const line = viz.svg
+    .selectAll(".line")
+    .data(qMatrix)
+    .enter()
+    .append("line")
+    .attr("stroke", "red")
+    .attr("strokeWidth", "1")
+    .classed("selectable line", true)
+    .exit()
+    .remove();
 
-  const circleMeasureOne = qMatrix.map(d => {
-    d3.select("svg")
-      .append("circle")
-      .attr("cx", xScale(d[0].qText) + xScale.bandwidth() / 2)
-      .attr("cy", yScale(d[1].qNum))
-      .attr("r", 5)
-      .attr("fill", colorFillOne)
-      .attr("dim-index", d[0].qElemNumber)
-      .classed("selectable", true)
-      .on("mouseover", handleMouseOver)
-      .on("mouseout", handleMouseOut);
-  });
+  const circleMeasureOne = viz.svg
+    .selectAll(".one")
+    .data(qMatrix)
+    .enter()
+    .append("circle")
+    .attr("r", 5)
+    .classed("selectable one", true)
+    .attr("fill", colorFillOne)
+    .on("mouseover", handleMouseOver)
+    .on("mouseout", handleMouseOut)
+    .exit()
+    .remove();
 
-  const circleMeasureTwo = qMatrix.map(d => {
-    d3.select("svg")
-      .append("circle")
-      .attr("cx", xScale(d[0].qText) + xScale.bandwidth() / 2)
-      .attr("cy", yScale(d[2].qNum))
-      .attr("r", 5)
-      .attr("fill", colorFillTwo)
-      .attr("dim-index", d[0].qElemNumber)
-      .classed("selectable", true)
-      .on("mouseover", handleMouseOver)
-      .on("mouseout", handleMouseOut);
-  });
+  const circleMeasureTwo = viz.svg
+    .selectAll(".two")
+    .data(qMatrix)
+    .enter()
+    .append("circle")
+    .attr("r", 5)
+    .classed("selectable two", true)
+    .attr("fill", colorFillTwo)
+    .on("mouseover", handleMouseOver)
+    .on("mouseout", handleMouseOut)
+    .exit()
+    .remove();
 
-  $element.find(".selectable").on("click", function() {
-    var dimInd = parseInt(this.getAttribute("dim-index"));
-    backendApi.selectValues(0, [dimInd], true);
-  });
-
-  //axis
-  var yAxis = d3.axisLeft().scale(yScale);
-  var xAxis = d3.axisBottom().scale(xScale);
-  var gxAxis = svg
-    .append("g")
-    .attr("transform", `translate(${margin.left}, 0)`)
-    .call(yAxis);
-
-  var gyAxis = svg
-    .append("g")
-    .attr("transform", `translate(0, ${height - margin.bottom})`)
-    .call(xAxis);
-
-  //mouse events how do i group an entire dumbell together to do this???
+  // mouse events how do i group an entire dumbell together to do this???
   function handleMouseOver(d, i) {
     //conditional statement. If hovered item has qElem number, do something.
     d3.select(this).attr("r", 10);
@@ -120,4 +68,20 @@ export default function($element, layout) {
   function handleMouseOut(d, i) {
     d3.select(this).attr("r", 5);
   }
+
+  ext.resize($element, layout);
+
+  var backendApi = this.backendApi;
+
+  $element.css("overflow", "auto");
+
+  $element.find(".selectable").on("click", function() {
+    var dimInd = parseInt(this.getAttribute("dim-index"));
+    backendApi.selectValues(0, [dimInd], true);
+  });
+
+  var ticks = d3.selectAll("g").on("click", function() {
+    //need dim index on each tick somehow...
+    d3.select(this).attr("dim-index", "5");
+  });
 }
