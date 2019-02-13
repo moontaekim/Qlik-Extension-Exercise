@@ -8,7 +8,7 @@ export default [
 
     viz.margin = {
       top: 10,
-      left: 50,
+      left: 60,
       right: 10,
       bottom: 50
     };

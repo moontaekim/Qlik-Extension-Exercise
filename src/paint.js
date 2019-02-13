@@ -22,48 +22,110 @@ export default function($element, layout) {
   var colorFillOne = layout.colorFillOne;
   var colorFillTwo = layout.colorFillTwo;
 
-  //why is resizing not working. circles dont move.
-  const line = viz.svg
-    .selectAll(".line")
-    .data(qMatrix)
+  const groups = viz.svg
+    .selectAll(".gStuff")
+    .data(qMatrix, d => d[0].qElemNumber);
+
+  groups.exit().remove();
+
+  const enteringGroups = groups
     .enter()
+    .append("g")
+    .classed("gStuff", true)
+    .on("mouseover", handleMouseOver)
+    .on("mouseout", handleMouseOut);
+
+  enteringGroups
     .append("line")
     .attr("stroke", "red")
     .attr("strokeWidth", "1")
-    .classed("selectable line", true)
-    .exit()
-    .remove();
+    .classed("selectable line", true);
 
-  const circleMeasureOne = viz.svg
-    .selectAll(".one")
-    .data(qMatrix)
-    .enter()
+  enteringGroups
     .append("circle")
     .attr("r", 5)
     .classed("selectable one", true)
-    .attr("fill", colorFillOne)
-    .on("mouseover", handleMouseOver)
-    .on("mouseout", handleMouseOut)
-    .exit()
-    .remove();
+    .attr("fill", colorFillOne);
 
-  const circleMeasureTwo = viz.svg
-    .selectAll(".two")
-    .data(qMatrix)
-    .enter()
+  enteringGroups
     .append("circle")
     .attr("r", 5)
     .classed("selectable two", true)
-    .attr("fill", colorFillTwo)
-    .on("mouseover", handleMouseOver)
-    .on("mouseout", handleMouseOut)
-    .exit()
-    .remove();
+    .attr("fill", colorFillTwo);
+  // .on("mouseover", handleMouseOver)
+  // .on("mouseout", handleMouseOut);
+
+  // join the data
+  // const lineJoin = viz.svg
+  //   .selectAll(".line") // [line (id: "b"), line (id:"a"), line (id: "c")]
+  //   .data(qMatrix, d => d[0].qElemNumber); // [{ id: "a", value: 1}, { id: "d", value: 2}]
+
+  // lineJoin.exit().remove();
+
+  // const lineEnter = lineJoin
+  //   .enter()
+  //   .append("line")
+  //   .attr("stroke", "red")
+  //   .attr("strokeWidth", "1")
+  //   .classed("selectable line", true);
+
+  // line.merge(lineEnter)
+  //   .attr("x1", d=>...)
+
+  //enter exit update? exit?
+  // const line = viz.svg
+  //   .selectAll(".line") // [line (id: "b"), line (id:"a"), line (id: "c")]
+  //   .data(qMatrix, d => d[0].qElemNumber) // [{ id: "a", value: 1}, { id: "d", value: 2}]
+  //   // exiting: "b", "c"
+  //   // entering: "d"
+  //   // existing: "a"
+  //   .enter()
+  //   .append("line")
+  //   .attr("stroke", "red")
+  //   .attr("strokeWidth", "1")
+  //   .classed("selectable line", true);
+
+  /*
+    <g transform="translate(100, 0)" onMouseEnter="">
+      <line />
+      <circle />
+      <circle />
+    </g>
+
+  */
+
+  // const circleMeasureOne = viz.svg
+  //   .selectAll(".one")
+  //   .data(qMatrix, d => d[0].qElemNumber);
+
+  // circleMeasureOne.exit().remove();
+
+  // circleMeasureOne
+  //   .enter()
+  //   .append("circle")
+  //   .attr("r", 5)
+  //   .classed("selectable one", true)
+  //   .attr("fill", colorFillOne)
+  //   .on("mouseover", handleMouseOver)
+  //   .on("mouseout", handleMouseOut);
+
+  // const circleMeasureTwo = viz.svg.selectAll(".two").data(qMatrix);
+
+  // circleMeasureTwo.exit().remove();
+
+  // circleMeasureTwo
+  //   .enter()
+  //   .append("circle")
+  //   .attr("r", 5)
+  //   .classed("selectable two", true)
+  //   .attr("fill", colorFillTwo)
+  //   .on("mouseover", handleMouseOver)
+  //   .on("mouseout", handleMouseOut);
 
   // mouse events how do i group an entire dumbell together to do this???
   function handleMouseOver(d, i) {
     //conditional statement. If hovered item has qElem number, do something.
-    d3.select(this).attr("r", 10);
+    d3.select(this).attr("opacity", 0.5);
   }
   function handleMouseOut(d, i) {
     d3.select(this).attr("r", 5);

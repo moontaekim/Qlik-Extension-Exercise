@@ -10713,7 +10713,7 @@ exports.default = ["$scope", "$element", function ($scope, $element) {
 
   viz.margin = {
     top: 10,
-    left: 50,
+    left: 60,
     right: 10,
     bottom: 50
   };
@@ -25085,17 +25085,92 @@ exports.default = function ($element, layout) {
   var colorFillOne = layout.colorFillOne;
   var colorFillTwo = layout.colorFillTwo;
 
-  //why is resizing not working. circles dont move.
-  var line = viz.svg.selectAll(".line").data(qMatrix).enter().append("line").attr("stroke", "red").attr("strokeWidth", "1").classed("selectable line", true).exit().remove();
+  var groups = viz.svg.selectAll(".gStuff").data(qMatrix, function (d) {
+    return d[0].qElemNumber;
+  });
 
-  var circleMeasureOne = viz.svg.selectAll(".one").data(qMatrix).enter().append("circle").attr("r", 5).classed("selectable one", true).attr("fill", colorFillOne).on("mouseover", handleMouseOver).on("mouseout", handleMouseOut).exit().remove();
+  groups.exit().remove();
 
-  var circleMeasureTwo = viz.svg.selectAll(".two").data(qMatrix).enter().append("circle").attr("r", 5).classed("selectable two", true).attr("fill", colorFillTwo).on("mouseover", handleMouseOver).on("mouseout", handleMouseOut).exit().remove();
+  var enteringGroups = groups.enter().append("g").classed("gStuff", true).on("mouseover", handleMouseOver).on("mouseout", handleMouseOut);
+
+  enteringGroups.append("line").attr("stroke", "red").attr("strokeWidth", "1").classed("selectable line", true);
+
+  enteringGroups.append("circle").attr("r", 5).classed("selectable one", true).attr("fill", colorFillOne);
+
+  enteringGroups.append("circle").attr("r", 5).classed("selectable two", true).attr("fill", colorFillTwo);
+  // .on("mouseover", handleMouseOver)
+  // .on("mouseout", handleMouseOut);
+
+  // join the data
+  // const lineJoin = viz.svg
+  //   .selectAll(".line") // [line (id: "b"), line (id:"a"), line (id: "c")]
+  //   .data(qMatrix, d => d[0].qElemNumber); // [{ id: "a", value: 1}, { id: "d", value: 2}]
+
+  // lineJoin.exit().remove();
+
+  // const lineEnter = lineJoin
+  //   .enter()
+  //   .append("line")
+  //   .attr("stroke", "red")
+  //   .attr("strokeWidth", "1")
+  //   .classed("selectable line", true);
+
+  // line.merge(lineEnter)
+  //   .attr("x1", d=>...)
+
+  //enter exit update? exit?
+  // const line = viz.svg
+  //   .selectAll(".line") // [line (id: "b"), line (id:"a"), line (id: "c")]
+  //   .data(qMatrix, d => d[0].qElemNumber) // [{ id: "a", value: 1}, { id: "d", value: 2}]
+  //   // exiting: "b", "c"
+  //   // entering: "d"
+  //   // existing: "a"
+  //   .enter()
+  //   .append("line")
+  //   .attr("stroke", "red")
+  //   .attr("strokeWidth", "1")
+  //   .classed("selectable line", true);
+
+  /*
+    <g transform="translate(100, 0)" onMouseEnter="">
+      <line />
+      <circle />
+      <circle />
+    </g>
+   */
+
+  // const circleMeasureOne = viz.svg
+  //   .selectAll(".one")
+  //   .data(qMatrix, d => d[0].qElemNumber);
+
+  // circleMeasureOne.exit().remove();
+
+  // circleMeasureOne
+  //   .enter()
+  //   .append("circle")
+  //   .attr("r", 5)
+  //   .classed("selectable one", true)
+  //   .attr("fill", colorFillOne)
+  //   .on("mouseover", handleMouseOver)
+  //   .on("mouseout", handleMouseOut);
+
+  // const circleMeasureTwo = viz.svg.selectAll(".two").data(qMatrix);
+
+  // circleMeasureTwo.exit().remove();
+
+  // circleMeasureTwo
+  //   .enter()
+  //   .append("circle")
+  //   .attr("r", 5)
+  //   .classed("selectable two", true)
+  //   .attr("fill", colorFillTwo)
+  //   .on("mouseover", handleMouseOver)
+  //   .on("mouseout", handleMouseOut);
 
   // mouse events how do i group an entire dumbell together to do this???
   function handleMouseOver(d, i) {
     //conditional statement. If hovered item has qElem number, do something.
-    d3.select(this).attr("r", 10);
+    d3.select(this).attr("opacity", 0.5);
   }
   function handleMouseOut(d, i) {
     d3.select(this).attr("r", 5);
@@ -25149,29 +25224,33 @@ exports.default = function ($element, layout, data) {
   var xScale = viz.xScale.range([viz.margin.left, width - viz.margin.right]);
   var yScale = viz.yScale.range([height - viz.margin.bottom, viz.margin.top]);
 
-  var line = viz.svg.selectAll(".line").attr("x1", function (d) {
-    return xScale(d[0].qText) + xScale.bandwidth() / 2;
-  }).attr("y1", function (d) {
+  viz.svg.selectAll(".gStuff").attr("transform", function (d) {
+    return "translate(" + (xScale(d[0].qText) + xScale.bandwidth() / 2) + ", 0)";
+  });
+
+  var line = viz.svg.selectAll(".line")
+  // .attr("x1", d => xScale(d[0].qText) + xScale.bandwidth() / 2)
+  .attr("y1", function (d) {
     return yScale(d[2].qNum);
-  }).attr("x2", function (d) {
-    return xScale(d[0].qText) + xScale.bandwidth() / 2;
-  }).attr("y2", function (d) {
+  })
+  // .attr("x2", d => xScale(d[0].qText) + xScale.bandwidth() / 2)
+  .attr("y2", function (d) {
     return yScale(d[1].qNum);
   }).attr("dim-index", function (d) {
     return d[0].qElemNumber;
   });
 
-  var circleMeasureOne = viz.svg.selectAll(".one").attr("cx", function (d) {
-    return xScale(d[0].qText) + xScale.bandwidth() / 2;
-  }).attr("cy", function (d) {
+  var circleMeasureOne = viz.svg.selectAll(".one")
+  // .attr("cx", d => xScale(d[0].qText) + xScale.bandwidth() / 2)
+  .attr("cy", function (d) {
     return yScale(d[1].qNum);
   }).attr("dim-index", function (d) {
     return d[0].qElemNumber;
   });
 
-  var circleMeasureTwo = viz.svg.selectAll(".two").attr("cx", function (d) {
-    return xScale(d[0].qText) + xScale.bandwidth() / 2;
-  }).attr("cy", function (d) {
+  var circleMeasureTwo = viz.svg.selectAll(".two")
+  // .attr("cx", d => xScale(d[0].qText) + xScale.bandwidth() / 2)
+  .attr("cy", function (d) {
     return yScale(d[2].qNum);
   }).attr("dim-index", function (d) {
     return d[0].qElemNumber;
@@ -25180,9 +25259,9 @@ exports.default = function ($element, layout, data) {
   //axis
   var yAxis = viz.yAxis.scale(yScale);
   var xAxis = viz.xAxis.scale(xScale);
-  var gyAxis = viz.gY.attr("transform", "translate(" + viz.margin.left + ", 0)").call(yAxis).exit().remove();
+  var gyAxis = viz.gY.attr("transform", "translate(" + viz.margin.left + ", 0)").call(yAxis);
 
-  var gxAxis = viz.gX.attr("transform", "translate(0, " + (height - viz.margin.bottom) + ")").call(xAxis).classed("ticks", true).exit().remove();
+  var gxAxis = viz.gX.attr("transform", "translate(0, " + (height - viz.margin.bottom) + ")").call(xAxis).classed("ticks", true);
 };
 
 var _d = __webpack_require__(51);
